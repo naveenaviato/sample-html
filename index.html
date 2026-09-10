@@ -3,453 +3,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bento Core // Digital Workspace</title>
-    
+    <title>Spatial Portfolio & Engine</title>
+
     <!-- Google Fonts & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- Dynamic Theme System --- */
+        /* --- Dynamic Theme Variables --- */
         :root {
-            --bg-base: #0b0f19;
-            --card-bg: rgba(18, 24, 38, 0.75);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --card-hover-border: rgba(99, 102, 241, 0.5);
-            --text-primary: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-primary: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --gradient-accent: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-            --radius-lg: 24px;
-            --radius-md: 16px;
-            --radius-sm: 8px;
-            --font-sans: 'Plus Jakarta Sans', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-        }
-
-        /* Light Theme Overrides */
-        .light-mode {
-            --bg-base: #f1f5f9;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --card-border: rgba(0, 0, 0, 0.08);
-            --card-hover-border: var(--accent-primary);
-            --text-primary: #0f172a;
-            --text-muted: #64748b;
+            --bg-color: #030712;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #f43f5e;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --card-glass: rgba(17, 24, 39, 0.55);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --font-main: 'Outfit', sans-serif;
+            --font-code: 'Space Mono', monospace;
+            --mouse-x: 50%;
+            --mouse-y: 50%;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
         }
 
         body {
-            background-color: var(--bg-base);
+            background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: var(--font-sans);
+            font-family: var(--font-main);
             min-height: 100vh;
-            padding: 2rem 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow-x: hidden;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            perspective: 1000px;
         }
 
-        /* --- Ambient Background Glows --- */
-        .glow-sphere {
+        /* --- Fullscreen Interactive 3D Canvas --- */
+        #spatial-canvas {
             position: fixed;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: var(--accent-glow);
-            filter: blur(120px);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: -1;
             pointer-events: none;
         }
 
-        .glow-1 { top: -100px; left: -100px; }
-        .glow-2 { bottom: -100px; right: -100px; }
-
-        /* --- Bento Container Layout --- */
-        .bento-container {
-            max-width: 1100px;
+        /* --- Main Container --- */
+        .wrapper {
             width: 100%;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.25rem;
+            max-width: 1100px;
+            padding: 2rem 1.5rem;
+            z-index: 1;
         }
 
-        /* --- Bento Card Base Style --- */
-        .bento-card {
-            background: var(--card-bg);
+        /* --- Floating Glass Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.75rem;
+            background: rgba(15, 23, 42, 0.65);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            padding: 1.75rem;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 100px;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
 
-        .bento-card:hover {
-            border-color: var(--card-hover-border);
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px var(--accent-glow);
-        }
-
-        /* --- Grid Spans --- */
-        .col-span-1 { grid-column: span 1; }
-        .col-span-2 { grid-column: span 2; }
-        .col-span-3 { grid-column: span 3; }
-        .col-span-4 { grid-column: span 4; }
-
-        .row-span-2 { grid-row: span 2; }
-
-        @media (max-width: 900px) {
-            .bento-container { grid-template-columns: repeat(2, 1fr); }
-            .col-span-2, .col-span-3, .col-span-4 { grid-column: span 2; }
-        }
-
-        @media (max-width: 600px) {
-            .bento-container { grid-template-columns: 1fr; }
-            .col-span-1, .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
-        }
-
-        /* --- Card 1: Main Bio Hero --- */
-        .hero-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: -1px;
-            margin-bottom: 0.75rem;
-        }
-
-        .gradient-text {
-            background: var(--gradient-accent);
+        .brand-logo {
+            font-family: var(--font-code);
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .hero-bio {
-            color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero-badge {
-            display: inline-flex;
+        .theme-swatch {
+            display: flex;
+            gap: 12px;
             align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            padding: 6px 12px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-family: var(--font-mono);
-            width: fit-content;
-            margin-bottom: 1rem;
         }
 
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 10px #10b981;
-        }
-
-        /* --- Card 2: Interactive Customizer --- */
-        .customizer-title {
-            font-size: 0.85rem;
-            font-family: var(--font-mono);
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .theme-bubbles {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-
-        .bubble {
-            width: 32px;
-            height: 32px;
+        .dot {
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             cursor: pointer;
-            border: 2px solid transparent;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .bubble:hover { transform: scale(1.15); }
-        .bubble.active { border-color: var(--text-primary); }
+        .dot:hover {
+            transform: scale(1.3);
+        }
 
-        .input-box {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.2);
+        /* --- 3D Interactive Spatial Cards Grid --- */
+        .spatial-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* 3D Tilt Card Base */
+        .tilt-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border: 1px solid var(--card-border);
-            padding: 10px 14px;
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-family: var(--font-sans);
-            outline: none;
+            border-radius: 24px;
+            padding: 2.25rem;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.15s ease-out, border-color 0.3s;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         }
 
-        .input-box:focus { border-color: var(--accent-primary); }
+        /* Mouse Light Follow Spotlight Effect */
+        .tilt-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
 
-        /* --- Card 3: Live Stats Display --- */
-        .stat-number {
-            font-size: 2.8rem;
+        .tilt-card:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Grid Spans */
+        .col-8 { grid-column: span 8; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-12 { grid-column: span 12; }
+
+        @media (max-width: 850px) {
+            .col-8, .col-4, .col-6 { grid-column: span 12; }
+        }
+
+        /* Hero Typography */
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 800;
-            font-family: var(--font-mono);
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+        }
+
+        .gradient-glow {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        /* Interactive Controls */
+        .interactive-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .spatial-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px 16px;
             color: var(--text-primary);
+            font-family: var(--font-main);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .spatial-input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Buttons */
+        .spatial-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, opacity 0.2s;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+        .spatial-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        /* Stat Counter */
+        .stat-value {
+            font-family: var(--font-code);
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            color: var(--text-muted);
-            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* --- Card 4: Interactive Project Cards --- */
-        .project-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .project-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: var(--radius-md);
-            background: var(--gradient-accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 1.2rem;
-        }
-
-        .tag-list {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-
-        .tag-pill {
-            font-family: var(--font-mono);
+        /* Project Cards List */
+        .project-tag {
+            font-family: var(--font-code);
             font-size: 0.75rem;
             padding: 4px 10px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
             border-radius: 6px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
 
-        /* --- Card 5: Interactive Terminal --- */
-        .terminal-box {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            font-family: var(--font-mono);
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-family: var(--font-code);
             font-size: 0.85rem;
-            height: 120px;
-            overflow-y: auto;
-            border: 1px solid var(--card-border);
-            margin-top: 1rem;
         }
-
-        .term-line { margin-bottom: 4px; }
-        .term-user { color: #10b981; }
-        .term-cmd { color: var(--text-primary); }
-
-        /* --- Interactive Buttons --- */
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background: var(--accent-primary);
-            color: #fff;
-            box-shadow: 0 4px 15px var(--accent-glow);
-        }
-
-        .btn-primary:hover { opacity: 0.9; }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            border: 1px solid var(--card-border);
-        }
-
-        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body>
 
-    <div class="glow-sphere glow-1"></div>
-    <div class="glow-sphere glow-2"></div>
+    <!-- 3D Background Spatial Canvas -->
+    <canvas id="spatial-canvas"></canvas>
 
-    <div class="bento-container">
+    <div class="wrapper">
+        <!-- Floating Glass Navigation -->
+        <header>
+            <div class="brand-logo">&lt;SPATIAL_CORE /&gt;</div>
+            <div class="theme-swatch">
+                <div class="dot" style="background: #06b6d4;" onclick="changeTheme('#06b6d4', '#8b5cf6')"></div>
+                <div class="dot" style="background: #10b981;" onclick="changeTheme('#10b981', '#3b82f6')"></div>
+                <div class="dot" style="background: #f43f5e;" onclick="changeTheme('#f43f5e', '#a855f7')"></div>
+                <div class="dot" style="background: #f59e0b;" onclick="changeTheme('#f59e0b', '#ec4899')"></div>
+            </div>
+        </header>
 
-        <!-- BENTO CARD 1: Main Hero Profile (2 Columns) -->
-        <div class="bento-card col-span-2 row-span-2">
-            <div>
-                <div class="hero-badge">
-                    <span class="badge-dot"></span> AVAILABLE FOR PROJECTS
-                </div>
+        <!-- Spatial 3D Grid -->
+        <div class="spatial-grid">
+
+            <!-- Hero Main Card -->
+            <div class="tilt-card col-8">
                 <h1 class="hero-title">
-                    Hello, I'm <span class="gradient-text" id="user-heading">Your Name</span>
+                    Interactive Spatial Web Experience by <span class="gradient-glow" id="user-name">Your Name</span>
                 </h1>
-                <p class="hero-bio">
-                    Full-stack software architect specializing in ultra-fast interactive digital experiences, modular design systems, and web frameworks.
+                <p class="hero-desc">
+                    Designing responsive, performance-driven web interfaces backed by 3D spatial physics, interactive canvas rendering, and modern web architecture.
                 </p>
+                <a href="#projects" class="spatial-btn">
+                    <i class="fa-solid fa-cube"></i> Explore Spatial Works
+                </a>
             </div>
 
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="runCommand('init_contact')">
-                    <i class="fa-solid fa-paper-plane"></i> Let's Talk
-                </button>
-                <button class="btn btn-secondary" onclick="toggleThemeMode()">
-                    <i class="fa-solid fa-moon"></i> Light/Dark
-                </button>
-            </div>
-        </div>
-
-        <!-- BENTO CARD 2: Interactive Theme & Name Lab (2 Columns) -->
-        <div class="bento-card col-span-2">
-            <div>
-                <div class="customizer-title">
-                    <span>LIVE ENGINE CUSTOMIZER</span>
-                    <i class="fa-solid fa-sliders"></i>
+            <!-- Dynamic Live Customizer Card -->
+            <div class="tilt-card col-4 interactive-panel">
+                <h3 style="font-family: var(--font-code); font-size: 0.9rem; color: var(--accent-cyan);">// SPATIAL_CONFIG</h3>
+                <div class="input-group">
+                    <label>Identity String:</label>
+                    <input type="text" class="spatial-input" value="Your Name" oninput="updateName(this.value)">
                 </div>
-                <div class="theme-bubbles">
-                    <div class="bubble active" style="background: #6366f1;" onclick="setAccent('#6366f1', '#a855f7', this)"></div>
-                    <div class="bubble" style="background: #06b6d4;" onclick="setAccent('#06b6d4', '#3b82f6', this)"></div>
-                    <div class="bubble" style="background: #10b981;" onclick="setAccent('#10b981', '#059669', this)"></div>
-                    <div class="bubble" style="background: #ec4899;" onclick="setAccent('#ec4899', '#f43f5e', this)"></div>
+                <div class="input-group">
+                    <label>Particle Density:</label>
+                    <input type="range" min="20" max="150" value="80" oninput="updateParticleCount(this.value)">
                 </div>
             </div>
-            <input type="text" class="input-box" placeholder="Type your name..." oninput="updateName(this.value)">
-        </div>
 
-        <!-- BENTO CARD 3: Stat Box A -->
-        <div class="bento-card col-span-1">
-            <div class="stat-label">Performance</div>
-            <div class="stat-number gradient-text">99%</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Core Web Vitals Optimized</div>
-        </div>
+            <!-- Metrics / Stats -->
+            <div class="tilt-card col-4">
+                <div class="stat-value gradient-glow">60FPS</div>
+                <div class="stat-label">Realtime Physics</div>
+            </div>
 
-        <!-- BENTO CARD 4: Stat Box B -->
-        <div class="bento-card col-span-1">
-            <div class="stat-label">Deployments</div>
-            <div class="stat-number" id="counter">140+</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Production Builds</div>
-        </div>
+            <div class="tilt-card col-4">
+                <div class="stat-value" id="particle-count-display">80</div>
+                <div class="stat-label">Active Particles</div>
+            </div>
 
-        <!-- BENTO CARD 5: Feature Project A (2 Columns) -->
-        <div class="bento-card col-span-2">
-            <div>
-                <div class="project-card-header">
-                    <div class="project-icon"><i class="fa-solid fa-cube"></i></div>
-                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--text-muted);"></i>
-                </div>
-                <h3>Bento UI Design System</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
-                    A modular layout framework optimized for maximum visual scannability and accessibility.
+            <div class="tilt-card col-4">
+                <div class="stat-value gradient-glow">&lt;1ms</div>
+                <div class="stat-label">Input Latency</div>
+            </div>
+
+            <!-- Featured Showcase Cards -->
+            <div class="tilt-card col-6" id="projects">
+                <h2 style="margin-bottom: 0.75rem;">3D Particle Engine</h2>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem;">
+                    A custom Canvas-based interactive physics engine that responds to cursor velocity and mouse spatial positioning.
                 </p>
+                <div style="display: flex; gap: 8px;">
+                    <span class="project-tag">HTML5 Canvas</span>
+                    <span class="project-tag">Physics Loop</span>
+                </div>
             </div>
-            <div class="tag-list">
-                <span class="tag-pill">HTML5</span>
-                <span class="tag-pill">CSS Grid</span>
-                <span class="tag-pill">Interactive JS</span>
+
+            <div class="tilt-card col-6">
+                <h2 style="margin-bottom: 0.75rem;">Tactile Matrix Glass</h2>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem;">
+                    A responsive layout framework utilizing dynamic matrix perspective math to tilt cards on user interaction.
+                </p>
+                <div style="display: flex; gap: 8px;">
+                    <span class="project-tag">CSS 3D Transforms</span>
+                    <span class="project-tag">Matrix Math</span>
+                </div>
             </div>
+
         </div>
 
-        <!-- BENTO CARD 6: Interactive Terminal Console (2 Columns) -->
-        <div class="bento-card col-span-2">
-            <div class="customizer-title">
-                <span>SYSTEM CONSOLE LOG</span>
-                <i class="fa-solid fa-terminal"></i>
-            </div>
-            <div class="terminal-box" id="terminal-body">
-                <div class="term-line"><span class="term-user">system@bento:~$</span> system_init --success</div>
-                <div class="term-line"><span class="term-user">system@bento:~$</span> interactive_lab_ready</div>
-            </div>
-        </div>
-
+        <footer>
+            &copy; <span id="year"></span> SPATIAL ENGINE // BUILT WITH HTML, CSS & JAVASCRIPT
+        </footer>
     </div>
 
-    <!-- JavaScript Controller -->
+    <!-- Script Layer for Physics, 3D Tilt & Canvas Render -->
     <script>
-        // Realtime Name Modifier
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Dynamic Name Binding
         function updateName(val) {
-            const heading = document.getElementById('user-heading');
-            heading.textContent = val.trim() !== "" ? val : "Your Name";
-            logTerminal(`updated_user_name: "${heading.textContent}"`);
+            document.getElementById('user-name').textContent = val || "Your Name";
         }
 
-        // Realtime Dynamic Theme Changer
-        function setAccent(colorPrimary, colorSecondary, element) {
-            document.documentElement.style.setProperty('--accent-primary', colorPrimary);
-            document.documentElement.style.setProperty('--accent-glow', colorPrimary + '40');
-            document.documentElement.style.setProperty('--gradient-accent', `linear-gradient(135deg, ${colorPrimary}, ${colorSecondary})`);
-            
-            document.querySelectorAll('.bubble').forEach(b => b.classList.remove('active'));
-            element.classList.add('active');
-
-            logTerminal(`accent_color_changed: ${colorPrimary}`);
+        // Theme Switcher
+        function changeTheme(primary, secondary) {
+            document.documentElement.style.setProperty('--accent-cyan', primary);
+            document.documentElement.style.setProperty('--accent-purple', secondary);
         }
 
-        // Toggle Dark/Light Mode
-        function toggleThemeMode() {
-            document.body.classList.toggle('light-mode');
-            const mode = document.body.classList.contains('light-mode') ? 'LIGHT' : 'DARK';
-            logTerminal(`theme_mode_switched: ${mode}`);
+        // 3D Tilt Card Effect
+        const cards = document.querySelectorAll('.tilt-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Mouse light spotlight position
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+
+                // 3D Tilt Matrix Calculation
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+            });
+        });
+
+        // Interactive Spatial Particle Canvas Engine
+        const canvas = document.getElementById('spatial-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        let numParticles = 80;
+        let mouse = { x: null, y: null, radius: 150 };
+
+        function initCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            createParticles();
         }
 
-        // Console Logging Engine
-        function logTerminal(msg) {
-            const term = document.getElementById('terminal-body');
-            const line = document.createElement('div');
-            line.className = 'term-line';
-            line.innerHTML = `<span class="term-user">event@log:~$</span> ${msg}`;
-            term.appendChild(line);
-            term.scrollTop = term.scrollHeight;
-        }
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
 
-        function runCommand(cmd) {
-            if(cmd === 'init_contact') {
-                alert("Opening connection portal...");
-                logTerminal('contact_protocol_initiated');
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.radius = Math.random() * 2 + 1;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Mouse Repulsion Physics
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= (dx / distance) * force * 5;
+                        this.y -= (dy / distance) * force * 5;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.fill();
             }
         }
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function updateParticleCount(val) {
+            numParticles = parseInt(val);
+            document.getElementById('particle-count-display').textContent = val;
+            createParticles();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Connect nearby particles with physics lines
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a + 1; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 - dist / 120})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        initCanvas();
+        animate();
     </script>
 </body>
 </html>
