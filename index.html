@@ -3,599 +3,527 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Developer Portfolio & Playground</title>
+    <title>Developer Interface & Workspace</title>
     
-    <!-- Google Fonts & FontAwesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,500;0,800;1,400&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- CSS Custom Properties --- */
+        /* --- Dynamic Theme Variables --- */
         :root {
-            --bg: #090d16;
-            --card-bg: rgba(22, 31, 49, 0.65);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f1f5f9;
-            --text-sub: #94a3b8;
-            --accent: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.35);
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-            --radius: 16px;
+            --bg-color: #08090a;
+            --surface: #101214;
+            --surface-hover: #171a1d;
+            --border: #22272b;
+            --text-main: #f0f3f6;
+            --text-muted: #768390;
+            --accent: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.25);
+            --font-head: 'Space Grotesk', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            --container-max: 1100px;
         }
 
-        /* --- Global Reset & Canvas Background --- */
+        /* --- Global Reset & Grid Engine --- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            scroll-behavior: smooth;
+            transition: background-color 0.25s, border-color 0.25s, color 0.25s;
         }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-color);
             color: var(--text-main);
+            font-family: var(--font-head);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             overflow-x: hidden;
-            position: relative;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.08), transparent 50%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
         }
 
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* --- Layout Container --- */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+        .layout-wrapper {
+            width: 100%;
+            max-width: var(--container-max);
             padding: 2rem 1.5rem;
         }
 
-        /* --- Glassmorphism UI Base --- */
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        /* --- Navigation Header --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.2rem 2rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .brand {
-            font-size: 1.25rem;
-            font-weight: 800;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .theme-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .color-bubble {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .color-bubble:hover { transform: scale(1.2); }
-        .color-bubble.active { border-color: #fff; }
-
-        /* --- Hero Section --- */
-        .hero {
-            padding: 3.5rem 2.5rem;
-            margin-bottom: 2.5rem;
+        /* --- Tactile Grid Structural Cards --- */
+        .grid-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.75rem;
             position: relative;
-            overflow: hidden;
         }
 
-        .hero-badge {
-            display: inline-flex;
+        .grid-card::before {
+            content: "";
+            position: absolute;
+            top: -1px; left: -1px; width: 6px; height: 6px;
+            background: var(--accent);
+        }
+
+        /* --- Top Navigation Bar --- */
+        header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-tag {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: var(--accent);
+            background: var(--accent-glow);
+            padding: 6px 12px;
+            border: 1px solid var(--accent);
+            display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 14px;
-            border-radius: 50px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            color: var(--accent);
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
         }
 
-        .hero-badge .pulse {
-            width: 8px;
-            height: 8px;
+        .status-dot {
+            width: 8px; height: 8px;
+            background-color: var(--accent);
             border-radius: 50%;
-            background-color: #10b981;
-            box-shadow: 0 0 8px #10b981;
+            animation: blink 1.5s infinite;
         }
 
-        .hero h1 {
-            font-size: 3rem;
+        @keyframes blink { 50% { opacity: 0.3; } }
+
+        .palette-switcher {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .color-chip {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .color-chip:hover { transform: translateY(-2px); }
+
+        /* --- Hero Terminal Section --- */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            .hero-grid { grid-template-columns: 1fr; }
+        }
+
+        .terminal-header {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .headline {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 700;
             line-height: 1.1;
-            font-weight: 800;
             margin-bottom: 1rem;
             letter-spacing: -1px;
         }
 
-        .hero p {
-            color: var(--text-sub);
-            font-size: 1.1rem;
-            line-height: 1.7;
-            max-width: 650px;
-            margin-bottom: 2rem;
+        .headline span {
+            color: var(--accent);
         }
 
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 26px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 4px 20px var(--accent-glow);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-            border: 1px solid var(--card-border);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        /* --- Section Titles --- */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+        .sub-text {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 1.05rem;
             margin-bottom: 1.5rem;
         }
 
-        .section-header h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
-
-        /* --- Filter Tabs --- */
-        .filters {
+        .cta-row {
             display: flex;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px;
-            border-radius: 10px;
-            border: 1px solid var(--card-border);
+            gap: 1rem;
+            font-family: var(--font-code);
         }
 
-        .filter-btn {
-            background: transparent;
+        .btn-action {
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+            padding: 12px 20px;
+            text-decoration: none;
             border: none;
-            color: var(--text-sub);
-            padding: 6px 14px;
-            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
         }
 
-        .filter-btn.active {
-            background: var(--card-bg);
+        .btn-action:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
             color: var(--text-main);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
         }
 
-        /* --- Projects Grid --- */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+        .btn-outline:hover {
+            background: var(--surface-hover);
         }
 
-        .project-card {
-            padding: 1.5rem;
+        /* --- Live Interactive Sandbox --- */
+        .sandbox-box {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: transform 0.3s ease, border-color 0.3s ease;
         }
 
-        .project-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-        }
-
-        .project-card .icon {
-            font-size: 1.8rem;
-            color: var(--accent);
+        .code-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             margin-bottom: 1rem;
         }
 
-        .project-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .project-card p {
-            color: var(--text-sub);
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 1.2rem;
-        }
-
-        .tags {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .tag {
+        .code-input-group label {
+            font-family: var(--font-code);
             font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-sub);
-            border: 1px solid var(--card-border);
+            color: var(--text-muted);
         }
 
-        /* --- Contact / Interactive Section --- */
-        .interactive-grid {
+        .code-input-group input {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            padding: 10px;
+            color: var(--accent);
+            font-family: var(--font-code);
+            outline: none;
+        }
+
+        .code-input-group input:focus {
+            border-color: var(--accent);
+        }
+
+        /* --- Interactive Metric Cards --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 650px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+        }
+
+        .metric-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .metric-num {
+            font-family: var(--font-code);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-top: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- Dynamic Interactive Showcase Section --- */
+        .section-title {
+            font-family: var(--font-code);
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .projects-list {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        @media (max-width: 768px) {
-            .interactive-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 2.2rem; }
+        @media (max-width: 700px) {
+            .projects-list { grid-template-columns: 1fr; }
         }
 
-        .contact-form {
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        .project-item {
+            cursor: pointer;
         }
 
-        .form-group {
+        .project-item:hover {
+            border-color: var(--accent);
+            background: var(--surface-hover);
+        }
+
+        .project-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .tech-stack {
+            display: flex;
             gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .form-group label {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            font-weight: 600;
+        .tech-pill {
+            font-family: var(--font-code);
+            font-size: 0.7rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            color: var(--text-muted);
         }
 
-        .form-group input, .form-group textarea {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 10px 14px;
+        /* --- Contact Console --- */
+        .console-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .console-input {
+            width: 100%;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
             color: var(--text-main);
+            padding: 12px;
+            font-family: var(--font-code);
+            margin-bottom: 1rem;
             outline: none;
-            transition: border-color 0.2s;
         }
 
-        .form-group input:focus, .form-group textarea:focus {
+        .console-input:focus {
             border-color: var(--accent);
         }
 
-        .status-panel {
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .skills-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .skill-bar {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .skill-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .progress-track {
-            height: 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-gradient);
-            border-radius: 10px;
-        }
-
         footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-sub);
-            font-size: 0.85rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
 
-    <!-- Particle Background Animation -->
-    <canvas id="bg-canvas"></canvas>
-
-    <div class="container">
+    <div class="layout-wrapper">
         <!-- Header -->
-        <header class="glass-panel">
-            <div class="brand">&lt;YourName /&gt;</div>
-            <div class="theme-controls">
-                <span style="font-size: 0.8rem; color: var(--text-sub);">Theme:</span>
-                <div class="color-bubble active" style="background: #6366f1;" onclick="setTheme('#6366f1', '#a855f7', this)"></div>
-                <div class="color-bubble" style="background: #06b6d4;" onclick="setTheme('#06b6d4', '#3b82f6', this)"></div>
-                <div class="color-bubble" style="background: #10b981;" onclick="setTheme('#10b981', '#059669', this)"></div>
-                <div class="color-bubble" style="background: #ec4899;" onclick="setTheme('#ec4899', '#8b5cf6', this)"></div>
+        <header>
+            <div class="status-tag">
+                <span class="status-dot"></span> SYSTEM_ONLINE // 2026_READY
+            </div>
+
+            <div style="font-family: var(--font-code); font-size: 0.9rem; color: var(--text-muted);">
+                USER: <span id="display-name" style="color: var(--text-main);">DEVELOPER</span>
+            </div>
+
+            <!-- Interactive Palette Switcher -->
+            <div class="palette-switcher">
+                <div class="color-chip" style="background: #22c55e;" title="Emerald" onclick="setAccent('#22c55e')"></div>
+                <div class="color-chip" style="background: #3b82f6;" title="Cyber Blue" onclick="setAccent('#3b82f6')"></div>
+                <div class="color-chip" style="background: #f43f5e;" title="Neon Pink" onclick="setAccent('#f43f5e')"></div>
+                <div class="color-chip" style="background: #eab308;" title="Amber" onclick="setAccent('#eab308')"></div>
             </div>
         </header>
 
-        <!-- Hero Section -->
-        <section class="hero glass-panel">
-            <div class="hero-badge">
-                <span class="pulse"></span> Open for Collaborations
-            </div>
-            <h1>Crafting Digital Experiences That Matter.</h1>
-            <p>
-                Hi! I am a full-stack creative developer building sleek, interactive, and responsive web applications with cutting-edge technology and smooth user interactions.
-            </p>
-            <div class="hero-actions">
-                <a href="#projects" class="btn btn-primary"><i class="fa-solid fa-code"></i> View Work</a>
-                <a href="#contact" class="btn btn-secondary"><i class="fa-solid fa-paper-plane"></i> Get in Touch</a>
-            </div>
-        </section>
-
-        <!-- Projects Showcase -->
-        <section id="projects">
-            <div class="section-header">
-                <h2>Selected Works</h2>
-                <div class="filters">
-                    <button class="filter-btn active" onclick="filterProjects('all', this)">All</button>
-                    <button class="filter-btn" onclick="filterProjects('web', this)">Web Apps</button>
-                    <button class="filter-btn" onclick="filterProjects('design', this)">UI/UX</button>
+        <!-- Main Hero Grid -->
+        <div class="hero-grid">
+            <div class="grid-card">
+                <div class="terminal-header">
+                    <span>MAIN_PROFILE.TS</span>
+                    <span>v3.0.4</span>
+                </div>
+                <h1 class="headline">Building fast, engineered <span id="highlight-text">web platforms</span>.</h1>
+                <p class="sub-text">
+                    Specializing in high-performance Web APIs, tactile interfaces, and clean frontend engineering. Turning complex concepts into scalable interactive software.
+                </p>
+                <div class="cta-row">
+                    <a href="#projects" class="btn-action"><i class="fa-solid fa-terminal"></i> VIEW_SYSTEMS</a>
+                    <a href="#console" class="btn-action btn-outline"><i class="fa-solid fa-envelope"></i> CONNECT</a>
                 </div>
             </div>
 
-            <div class="projects-grid">
-                <div class="project-card glass-panel" data-category="web">
-                    <div>
-                        <i class="fa-solid fa-bolt icon"></i>
-                        <h3>Realtime Analytics Dashboard</h3>
-                        <p>High-performance dashboard tracking live data streams with dynamic visualizations.</p>
-                    </div>
-                    <div class="tags">
-                        <span class="tag">JavaScript</span>
-                        <span class="tag">WebSockets</span>
-                        <span class="tag">CSS3</span>
-                    </div>
+            <!-- Live Controller Sandbox -->
+            <div class="grid-card sandbox-box">
+                <div class="terminal-header">
+                    <span>LIVE_SANDBOX.CONFIG</span>
+                    <i class="fa-solid fa-sliders"></i>
                 </div>
-
-                <div class="project-card glass-panel" data-category="design">
-                    <div>
-                        <i class="fa-solid fa-palette icon"></i>
-                        <h3>Design System Generator</h3>
-                        <p>An interactive palette and typography scale builder for modern designers.</p>
-                    </div>
-                    <div class="tags">
-                        <span class="tag">UI Design</span>
-                        <span class="tag">Figma</span>
-                        <span class="tag">CSS Variables</span>
-                    </div>
-                </div>
-
-                <div class="project-card glass-panel" data-category="web">
-                    <div>
-                        <i class="fa-solid fa-layer-group icon"></i>
-                        <h3>Glassmorphism UI Kit</h3>
-                        <p>Open-source library of highly customizable, modern frosted glass UI components.</p>
-                    </div>
-                    <div class="tags">
-                        <span class="tag">HTML5</span>
-                        <span class="tag">SCSS</span>
-                        <span class="tag">Open Source</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Interactive & Contact Section -->
-        <div class="interactive-grid" id="contact">
-            <!-- Contact Form -->
-            <form class="contact-form glass-panel" onsubmit="handleContact(event)">
-                <h3 style="margin-bottom: 0.5rem;">Send a Message</h3>
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" placeholder="Your Name" required>
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" placeholder="yourname@domain.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea rows="4" placeholder="Tell me about your project..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="justify-content: center; width: 100%;">
-                    <i class="fa-solid fa-paper-plane"></i> Send Message
-                </button>
-            </form>
-
-            <!-- Skill Overview -->
-            <div class="status-panel glass-panel">
                 <div>
-                    <h3 style="margin-bottom: 1.5rem;">Technical Proficiency</h3>
-                    <div class="skills-container">
-                        <div class="skill-bar">
-                            <div class="skill-info"><span>Frontend Architecture</span><span>92%</span></div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 92%;"></div></div>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-info"><span>JavaScript / Interactive UI</span><span>88%</span></div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 88%;"></div></div>
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-info"><span>UI/UX Design</span><span>82%</span></div>
-                            <div class="progress-track"><div class="progress-fill" style="width: 82%;"></div></div>
-                        </div>
+                    <div class="code-input-group">
+                        <label>EDIT_DISPLAY_NAME:</label>
+                        <input type="text" id="name-input" value="Your Name" oninput="updateName(this.value)">
+                    </div>
+                    <div class="code-input-group">
+                        <label>EDIT_HIGHLIGHT_KEYWORD:</label>
+                        <input type="text" value="web platforms" oninput="updateHighlight(this.value)">
                     </div>
                 </div>
-                
-                <div style="margin-top: 2rem; border-top: 1px solid var(--card-border); padding-top: 1rem; display: flex; gap: 15px; font-size: 1.2rem;">
-                    <a href="#" style="color: var(--text-sub);"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" style="color: var(--text-sub);"><i class="fa-brands fa-linkedin"></i></a>
-                    <a href="#" style="color: var(--text-sub);"><i class="fa-brands fa-twitter"></i></a>
+                <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--text-muted);">
+                    &gt; Realtime DOM binding active.
                 </div>
             </div>
         </div>
 
+        <!-- Metric Displays -->
+        <div class="metrics-grid">
+            <div class="grid-card metric-card">
+                <span class="metric-label">System Performance</span>
+                <div class="metric-num" style="color: var(--accent);">99.8%</div>
+            </div>
+            <div class="grid-card metric-card">
+                <span class="metric-label">Repositories Built</span>
+                <div class="metric-num">42+</div>
+            </div>
+            <div class="grid-card metric-card">
+                <span class="metric-label">Interface Latency</span>
+                <div class="metric-num">&lt;12ms</div>
+            </div>
+        </div>
+
+        <!-- Projects Showcase -->
+        <div class="section-title">
+            <i class="fa-solid fa-layer-group"></i> FEATURED_DEPLOYMENTS
+        </div>
+        <div class="projects-list" id="projects">
+            <div class="grid-card project-item" onclick="triggerAlert('Data Flow Pipeline')">
+                <div class="project-title">
+                    Realtime Data Engine
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.9rem; color: var(--accent);"></i>
+                </div>
+                <div class="project-desc">
+                    Scalable streaming pipeline rendering high-throughput data visualizers with low latency.
+                </div>
+                <div class="tech-stack">
+                    <span class="tech-pill">TypeScript</span>
+                    <span class="tech-pill">WebSockets</span>
+                    <span class="tech-pill">Canvas API</span>
+                </div>
+            </div>
+
+            <div class="grid-card project-item" onclick="triggerAlert('Tactile UI Kit')">
+                <div class="project-title">
+                    Tactile Component Library
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.9rem; color: var(--accent);"></i>
+                </div>
+                <div class="project-desc">
+                    Engineered design system prioritizing raw geometry, explicit 1px borders, and zero-latency feedback.
+                </div>
+                <div class="tech-stack">
+                    <span class="tech-pill">CSS Custom Vars</span>
+                    <span class="tech-pill">HTML5</span>
+                    <span class="tech-pill">Microinteractions</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Console -->
+        <div class="section-title" id="console">
+            <i class="fa-solid fa-code"></i> TRANSMIT_MESSAGE
+        </div>
+        <div class="grid-card console-grid">
+            <form onsubmit="handleSend(event)">
+                <input type="text" class="console-input" placeholder="SENDER_EMAIL // name@domain.com" required>
+                <textarea class="console-input" rows="4" placeholder="MESSAGE_PAYLOAD // Type your query here..." required></textarea>
+                <button type="submit" class="btn-action"><i class="fa-solid fa-paper-plane"></i> EXECUTE_TRANSMISSION</button>
+            </form>
+        </div>
+
         <!-- Footer -->
         <footer>
-            &copy; <span id="year"></span> Designed & Developed with HTML, CSS, and JS.
+            <div>&copy; <span id="year"></span> WORKSPACE // ALL_SYSTEMS_OPERATIONAL</div>
+            <div style="display: flex; gap: 1rem;">
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">[GITHUB]</a>
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">[LINKEDIN]</a>
+            </div>
         </footer>
     </div>
 
-    <!-- JavaScript Interactions -->
+    <!-- Script Layer -->
     <script>
-        // Set dynamic year
+        // Set dynamic date
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Color Theme Switcher
-        function setTheme(primaryColor, secondaryColor, element) {
-            document.documentElement.style.setProperty('--accent', primaryColor);
-            document.documentElement.style.setProperty('--accent-glow', primaryColor + '55');
-            document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`);
-            
-            document.querySelectorAll('.color-bubble').forEach(bubble => bubble.classList.remove('active'));
-            element.classList.add('active');
+        // Realtime DOM Binding
+        function updateName(val) {
+            document.getElementById('display-name').textContent = val || 'DEVELOPER';
         }
 
-        // Project Filtering Logic
-        function filterProjects(category, btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const cards = document.querySelectorAll('.project-card');
-            cards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+        function updateHighlight(val) {
+            document.getElementById('highlight-text').textContent = val || 'systems';
         }
 
-        // Contact Form Handler
-        function handleContact(e) {
+        // Live Accent Swapper
+        function setAccent(colorHex) {
+            document.documentElement.style.setProperty('--accent', colorHex);
+            document.documentElement.style.setProperty('--accent-glow', colorHex + '40');
+        }
+
+        // Interactive Click Callback
+        function triggerAlert(title) {
+            alert(`[SYSTEM NOTICE]: Opening inspect protocol for: ${title}`);
+        }
+
+        // Form Transmission Handling
+        function handleSend(e) {
             e.preventDefault();
-            alert('Thank you for reaching out! Your message has been received.');
+            alert('[STATUS 200]: Transmission successfully delivered to target inbox.');
             e.target.reset();
         }
-
-        // Interactive Particle Canvas Background
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        const particles = [];
-        for (let i = 0; i < 45; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                dx: (Math.random() - 0.5) * 0.5,
-                dy: (Math.random() - 0.5) * 0.5,
-                alpha: Math.random() * 0.5 + 0.2
-            });
-        }
-
-        function animateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.x += p.dx;
-                p.y += p.dy;
-
-                if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-                ctx.fill();
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-        animateCanvas();
     </script>
 </body>
 </html>
