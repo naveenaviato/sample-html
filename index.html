@@ -3,526 +3,452 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Developer Interface & Workspace</title>
+    <title>Bento Core // Digital Workspace</title>
     
     <!-- Google Fonts & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,500;0,800;1,400&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- Dynamic Theme Variables --- */
+        /* --- Dynamic Theme System --- */
         :root {
-            --bg-color: #08090a;
-            --surface: #101214;
-            --surface-hover: #171a1d;
-            --border: #22272b;
-            --text-main: #f0f3f6;
-            --text-muted: #768390;
-            --accent: #22c55e;
-            --accent-glow: rgba(34, 197, 94, 0.25);
-            --font-head: 'Space Grotesk', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-            --container-max: 1100px;
+            --bg-base: #0b0f19;
+            --card-bg: rgba(18, 24, 38, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-border: rgba(99, 102, 241, 0.5);
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-primary: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --gradient-accent: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 8px;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        /* --- Global Reset & Grid Engine --- */
+        /* Light Theme Overrides */
+        .light-mode {
+            --bg-base: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --card-hover-border: var(--accent-primary);
+            --text-primary: #0f172a;
+            --text-muted: #64748b;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-head);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
             min-height: 100vh;
+            padding: 2rem 1rem;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.08), transparent 50%),
-                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
+            position: relative;
         }
 
-        .layout-wrapper {
+        /* --- Ambient Background Glows --- */
+        .glow-sphere {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            filter: blur(120px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .glow-1 { top: -100px; left: -100px; }
+        .glow-2 { bottom: -100px; right: -100px; }
+
+        /* --- Bento Container Layout --- */
+        .bento-container {
+            max-width: 1100px;
             width: 100%;
-            max-width: var(--container-max);
-            padding: 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
         }
 
-        /* --- Tactile Grid Structural Cards --- */
-        .grid-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 4px;
+        /* --- Bento Card Base Style --- */
+        .bento-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
             padding: 1.75rem;
             position: relative;
-        }
-
-        .grid-card::before {
-            content: "";
-            position: absolute;
-            top: -1px; left: -1px; width: 6px; height: 6px;
-            background: var(--accent);
-        }
-
-        /* --- Top Navigation Bar --- */
-        header {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .status-tag {
-            font-family: var(--font-code);
-            font-size: 0.8rem;
-            color: var(--accent);
-            background: var(--accent-glow);
-            padding: 6px 12px;
-            border: 1px solid var(--accent);
+            overflow: hidden;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        .status-dot {
-            width: 8px; height: 8px;
-            background-color: var(--accent);
-            border-radius: 50%;
-            animation: blink 1.5s infinite;
+        .bento-card:hover {
+            border-color: var(--card-hover-border);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px var(--accent-glow);
         }
 
-        @keyframes blink { 50% { opacity: 0.3; } }
+        /* --- Grid Spans --- */
+        .col-span-1 { grid-column: span 1; }
+        .col-span-2 { grid-column: span 2; }
+        .col-span-3 { grid-column: span 3; }
+        .col-span-4 { grid-column: span 4; }
 
-        .palette-switcher {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
+        .row-span-2 { grid-row: span 2; }
+
+        @media (max-width: 900px) {
+            .bento-container { grid-template-columns: repeat(2, 1fr); }
+            .col-span-2, .col-span-3, .col-span-4 { grid-column: span 2; }
         }
 
-        .color-chip {
-            width: 28px;
-            height: 28px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            border-radius: 2px;
-            position: relative;
+        @media (max-width: 600px) {
+            .bento-container { grid-template-columns: 1fr; }
+            .col-span-1, .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
         }
 
-        .color-chip:hover { transform: translateY(-2px); }
-
-        /* --- Hero Terminal Section --- */
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        /* --- Card 1: Main Bio Hero --- */
+        .hero-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 0.75rem;
         }
 
-        @media (max-width: 850px) {
-            .hero-grid { grid-template-columns: 1fr; }
+        .gradient-text {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .terminal-header {
-            font-family: var(--font-code);
-            font-size: 0.8rem;
+        .hero-bio {
             color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.75rem;
-            margin-bottom: 1.25rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            width: fit-content;
+            margin-bottom: 1rem;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        /* --- Card 2: Interactive Customizer --- */
+        .customizer-title {
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
         }
 
-        .headline {
-            font-size: clamp(2rem, 4vw, 3.2rem);
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1rem;
-            letter-spacing: -1px;
-        }
-
-        .headline span {
-            color: var(--accent);
-        }
-
-        .sub-text {
-            color: var(--text-muted);
-            line-height: 1.6;
-            font-size: 1.05rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta-row {
+        .theme-bubbles {
             display: flex;
-            gap: 1rem;
-            font-family: var(--font-code);
+            gap: 10px;
+            margin-bottom: 1rem;
         }
 
-        .btn-action {
-            background: var(--accent);
-            color: #000;
-            font-weight: 700;
-            padding: 12px 20px;
-            text-decoration: none;
-            border: none;
+        .bubble {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .bubble:hover { transform: scale(1.15); }
+        .bubble.active { border-color: var(--text-primary); }
+
+        .input-box {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            outline: none;
+        }
+
+        .input-box:focus { border-color: var(--accent-primary); }
+
+        /* --- Card 3: Live Stats Display --- */
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- Card 4: Interactive Project Cards --- */
+        .project-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .project-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: var(--gradient-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .tag-pill {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-muted);
+        }
+
+        /* --- Card 5: Interactive Terminal --- */
+        .terminal-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            height: 120px;
+            overflow-y: auto;
+            border: 1px solid var(--card-border);
+            margin-top: 1rem;
+        }
+
+        .term-line { margin-bottom: 4px; }
+        .term-user { color: #10b981; }
+        .term-cmd { color: var(--text-primary); }
+
+        /* --- Interactive Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
         }
 
-        .btn-action:hover {
-            opacity: 0.9;
-            box-shadow: 0 0 15px var(--accent-glow);
+        .btn-primary {
+            background: var(--accent-primary);
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border);
+        .btn-primary:hover { opacity: 0.9; }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
         }
 
-        .btn-outline:hover {
-            background: var(--surface-hover);
-        }
-
-        /* --- Live Interactive Sandbox --- */
-        .sandbox-box {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .code-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .code-input-group label {
-            font-family: var(--font-code);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .code-input-group input {
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            padding: 10px;
-            color: var(--accent);
-            font-family: var(--font-code);
-            outline: none;
-        }
-
-        .code-input-group input:focus {
-            border-color: var(--accent);
-        }
-
-        /* --- Interactive Metric Cards --- */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 650px) {
-            .metrics-grid { grid-template-columns: 1fr; }
-        }
-
-        .metric-card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .metric-num {
-            font-family: var(--font-code);
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-top: 0.5rem;
-        }
-
-        .metric-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- Dynamic Interactive Showcase Section --- */
-        .section-title {
-            font-family: var(--font-code);
-            font-size: 1rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .projects-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 700px) {
-            .projects-list { grid-template-columns: 1fr; }
-        }
-
-        .project-item {
-            cursor: pointer;
-        }
-
-        .project-item:hover {
-            border-color: var(--accent);
-            background: var(--surface-hover);
-        }
-
-        .project-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .project-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        .tech-stack {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .tech-pill {
-            font-family: var(--font-code);
-            font-size: 0.7rem;
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            padding: 4px 8px;
-            color: var(--text-muted);
-        }
-
-        /* --- Contact Console --- */
-        .console-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        .console-input {
-            width: 100%;
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 12px;
-            font-family: var(--font-code);
-            margin-bottom: 1rem;
-            outline: none;
-        }
-
-        .console-input:focus {
-            border-color: var(--accent);
-        }
-
-        footer {
-            margin-top: 3rem;
-            border-top: 1px solid var(--border);
-            padding-top: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-code);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body>
 
-    <div class="layout-wrapper">
-        <!-- Header -->
-        <header>
-            <div class="status-tag">
-                <span class="status-dot"></span> SYSTEM_ONLINE // 2026_READY
-            </div>
+    <div class="glow-sphere glow-1"></div>
+    <div class="glow-sphere glow-2"></div>
 
-            <div style="font-family: var(--font-code); font-size: 0.9rem; color: var(--text-muted);">
-                USER: <span id="display-name" style="color: var(--text-main);">DEVELOPER</span>
-            </div>
+    <div class="bento-container">
 
-            <!-- Interactive Palette Switcher -->
-            <div class="palette-switcher">
-                <div class="color-chip" style="background: #22c55e;" title="Emerald" onclick="setAccent('#22c55e')"></div>
-                <div class="color-chip" style="background: #3b82f6;" title="Cyber Blue" onclick="setAccent('#3b82f6')"></div>
-                <div class="color-chip" style="background: #f43f5e;" title="Neon Pink" onclick="setAccent('#f43f5e')"></div>
-                <div class="color-chip" style="background: #eab308;" title="Amber" onclick="setAccent('#eab308')"></div>
-            </div>
-        </header>
-
-        <!-- Main Hero Grid -->
-        <div class="hero-grid">
-            <div class="grid-card">
-                <div class="terminal-header">
-                    <span>MAIN_PROFILE.TS</span>
-                    <span>v3.0.4</span>
+        <!-- BENTO CARD 1: Main Hero Profile (2 Columns) -->
+        <div class="bento-card col-span-2 row-span-2">
+            <div>
+                <div class="hero-badge">
+                    <span class="badge-dot"></span> AVAILABLE FOR PROJECTS
                 </div>
-                <h1 class="headline">Building fast, engineered <span id="highlight-text">web platforms</span>.</h1>
-                <p class="sub-text">
-                    Specializing in high-performance Web APIs, tactile interfaces, and clean frontend engineering. Turning complex concepts into scalable interactive software.
+                <h1 class="hero-title">
+                    Hello, I'm <span class="gradient-text" id="user-heading">Your Name</span>
+                </h1>
+                <p class="hero-bio">
+                    Full-stack software architect specializing in ultra-fast interactive digital experiences, modular design systems, and web frameworks.
                 </p>
-                <div class="cta-row">
-                    <a href="#projects" class="btn-action"><i class="fa-solid fa-terminal"></i> VIEW_SYSTEMS</a>
-                    <a href="#console" class="btn-action btn-outline"><i class="fa-solid fa-envelope"></i> CONNECT</a>
-                </div>
             </div>
 
-            <!-- Live Controller Sandbox -->
-            <div class="grid-card sandbox-box">
-                <div class="terminal-header">
-                    <span>LIVE_SANDBOX.CONFIG</span>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="runCommand('init_contact')">
+                    <i class="fa-solid fa-paper-plane"></i> Let's Talk
+                </button>
+                <button class="btn btn-secondary" onclick="toggleThemeMode()">
+                    <i class="fa-solid fa-moon"></i> Light/Dark
+                </button>
+            </div>
+        </div>
+
+        <!-- BENTO CARD 2: Interactive Theme & Name Lab (2 Columns) -->
+        <div class="bento-card col-span-2">
+            <div>
+                <div class="customizer-title">
+                    <span>LIVE ENGINE CUSTOMIZER</span>
                     <i class="fa-solid fa-sliders"></i>
                 </div>
-                <div>
-                    <div class="code-input-group">
-                        <label>EDIT_DISPLAY_NAME:</label>
-                        <input type="text" id="name-input" value="Your Name" oninput="updateName(this.value)">
-                    </div>
-                    <div class="code-input-group">
-                        <label>EDIT_HIGHLIGHT_KEYWORD:</label>
-                        <input type="text" value="web platforms" oninput="updateHighlight(this.value)">
-                    </div>
+                <div class="theme-bubbles">
+                    <div class="bubble active" style="background: #6366f1;" onclick="setAccent('#6366f1', '#a855f7', this)"></div>
+                    <div class="bubble" style="background: #06b6d4;" onclick="setAccent('#06b6d4', '#3b82f6', this)"></div>
+                    <div class="bubble" style="background: #10b981;" onclick="setAccent('#10b981', '#059669', this)"></div>
+                    <div class="bubble" style="background: #ec4899;" onclick="setAccent('#ec4899', '#f43f5e', this)"></div>
                 </div>
-                <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--text-muted);">
-                    &gt; Realtime DOM binding active.
+            </div>
+            <input type="text" class="input-box" placeholder="Type your name..." oninput="updateName(this.value)">
+        </div>
+
+        <!-- BENTO CARD 3: Stat Box A -->
+        <div class="bento-card col-span-1">
+            <div class="stat-label">Performance</div>
+            <div class="stat-number gradient-text">99%</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Core Web Vitals Optimized</div>
+        </div>
+
+        <!-- BENTO CARD 4: Stat Box B -->
+        <div class="bento-card col-span-1">
+            <div class="stat-label">Deployments</div>
+            <div class="stat-number" id="counter">140+</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Production Builds</div>
+        </div>
+
+        <!-- BENTO CARD 5: Feature Project A (2 Columns) -->
+        <div class="bento-card col-span-2">
+            <div>
+                <div class="project-card-header">
+                    <div class="project-icon"><i class="fa-solid fa-cube"></i></div>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="color: var(--text-muted);"></i>
                 </div>
+                <h3>Bento UI Design System</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
+                    A modular layout framework optimized for maximum visual scannability and accessibility.
+                </p>
+            </div>
+            <div class="tag-list">
+                <span class="tag-pill">HTML5</span>
+                <span class="tag-pill">CSS Grid</span>
+                <span class="tag-pill">Interactive JS</span>
             </div>
         </div>
 
-        <!-- Metric Displays -->
-        <div class="metrics-grid">
-            <div class="grid-card metric-card">
-                <span class="metric-label">System Performance</span>
-                <div class="metric-num" style="color: var(--accent);">99.8%</div>
+        <!-- BENTO CARD 6: Interactive Terminal Console (2 Columns) -->
+        <div class="bento-card col-span-2">
+            <div class="customizer-title">
+                <span>SYSTEM CONSOLE LOG</span>
+                <i class="fa-solid fa-terminal"></i>
             </div>
-            <div class="grid-card metric-card">
-                <span class="metric-label">Repositories Built</span>
-                <div class="metric-num">42+</div>
-            </div>
-            <div class="grid-card metric-card">
-                <span class="metric-label">Interface Latency</span>
-                <div class="metric-num">&lt;12ms</div>
+            <div class="terminal-box" id="terminal-body">
+                <div class="term-line"><span class="term-user">system@bento:~$</span> system_init --success</div>
+                <div class="term-line"><span class="term-user">system@bento:~$</span> interactive_lab_ready</div>
             </div>
         </div>
 
-        <!-- Projects Showcase -->
-        <div class="section-title">
-            <i class="fa-solid fa-layer-group"></i> FEATURED_DEPLOYMENTS
-        </div>
-        <div class="projects-list" id="projects">
-            <div class="grid-card project-item" onclick="triggerAlert('Data Flow Pipeline')">
-                <div class="project-title">
-                    Realtime Data Engine
-                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.9rem; color: var(--accent);"></i>
-                </div>
-                <div class="project-desc">
-                    Scalable streaming pipeline rendering high-throughput data visualizers with low latency.
-                </div>
-                <div class="tech-stack">
-                    <span class="tech-pill">TypeScript</span>
-                    <span class="tech-pill">WebSockets</span>
-                    <span class="tech-pill">Canvas API</span>
-                </div>
-            </div>
-
-            <div class="grid-card project-item" onclick="triggerAlert('Tactile UI Kit')">
-                <div class="project-title">
-                    Tactile Component Library
-                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.9rem; color: var(--accent);"></i>
-                </div>
-                <div class="project-desc">
-                    Engineered design system prioritizing raw geometry, explicit 1px borders, and zero-latency feedback.
-                </div>
-                <div class="tech-stack">
-                    <span class="tech-pill">CSS Custom Vars</span>
-                    <span class="tech-pill">HTML5</span>
-                    <span class="tech-pill">Microinteractions</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Console -->
-        <div class="section-title" id="console">
-            <i class="fa-solid fa-code"></i> TRANSMIT_MESSAGE
-        </div>
-        <div class="grid-card console-grid">
-            <form onsubmit="handleSend(event)">
-                <input type="text" class="console-input" placeholder="SENDER_EMAIL // name@domain.com" required>
-                <textarea class="console-input" rows="4" placeholder="MESSAGE_PAYLOAD // Type your query here..." required></textarea>
-                <button type="submit" class="btn-action"><i class="fa-solid fa-paper-plane"></i> EXECUTE_TRANSMISSION</button>
-            </form>
-        </div>
-
-        <!-- Footer -->
-        <footer>
-            <div>&copy; <span id="year"></span> WORKSPACE // ALL_SYSTEMS_OPERATIONAL</div>
-            <div style="display: flex; gap: 1rem;">
-                <a href="#" style="color: var(--text-muted); text-decoration: none;">[GITHUB]</a>
-                <a href="#" style="color: var(--text-muted); text-decoration: none;">[LINKEDIN]</a>
-            </div>
-        </footer>
     </div>
 
-    <!-- Script Layer -->
+    <!-- JavaScript Controller -->
     <script>
-        // Set dynamic date
-        document.getElementById('year').textContent = new Date().getFullYear();
-
-        // Realtime DOM Binding
+        // Realtime Name Modifier
         function updateName(val) {
-            document.getElementById('display-name').textContent = val || 'DEVELOPER';
+            const heading = document.getElementById('user-heading');
+            heading.textContent = val.trim() !== "" ? val : "Your Name";
+            logTerminal(`updated_user_name: "${heading.textContent}"`);
         }
 
-        function updateHighlight(val) {
-            document.getElementById('highlight-text').textContent = val || 'systems';
+        // Realtime Dynamic Theme Changer
+        function setAccent(colorPrimary, colorSecondary, element) {
+            document.documentElement.style.setProperty('--accent-primary', colorPrimary);
+            document.documentElement.style.setProperty('--accent-glow', colorPrimary + '40');
+            document.documentElement.style.setProperty('--gradient-accent', `linear-gradient(135deg, ${colorPrimary}, ${colorSecondary})`);
+            
+            document.querySelectorAll('.bubble').forEach(b => b.classList.remove('active'));
+            element.classList.add('active');
+
+            logTerminal(`accent_color_changed: ${colorPrimary}`);
         }
 
-        // Live Accent Swapper
-        function setAccent(colorHex) {
-            document.documentElement.style.setProperty('--accent', colorHex);
-            document.documentElement.style.setProperty('--accent-glow', colorHex + '40');
+        // Toggle Dark/Light Mode
+        function toggleThemeMode() {
+            document.body.classList.toggle('light-mode');
+            const mode = document.body.classList.contains('light-mode') ? 'LIGHT' : 'DARK';
+            logTerminal(`theme_mode_switched: ${mode}`);
         }
 
-        // Interactive Click Callback
-        function triggerAlert(title) {
-            alert(`[SYSTEM NOTICE]: Opening inspect protocol for: ${title}`);
+        // Console Logging Engine
+        function logTerminal(msg) {
+            const term = document.getElementById('terminal-body');
+            const line = document.createElement('div');
+            line.className = 'term-line';
+            line.innerHTML = `<span class="term-user">event@log:~$</span> ${msg}`;
+            term.appendChild(line);
+            term.scrollTop = term.scrollHeight;
         }
 
-        // Form Transmission Handling
-        function handleSend(e) {
-            e.preventDefault();
-            alert('[STATUS 200]: Transmission successfully delivered to target inbox.');
-            e.target.reset();
+        function runCommand(cmd) {
+            if(cmd === 'init_contact') {
+                alert("Opening connection portal...");
+                logTerminal('contact_protocol_initiated');
+            }
         }
     </script>
 </body>
